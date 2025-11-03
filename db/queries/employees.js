@@ -7,8 +7,8 @@ export async function createEmployee({ name, birthday, salary }) {
     (name, birthday, salary)
   VALUES
     ($1, $2, $3)
-  RETURNING id, name, birthday, salary
-  `; //returning is basically like adding a select at the end of an insert
+  RETURNING *
+  `;
   const {
     rows: [employee],
   } = await db.query(sql, [name, birthday, salary]);
@@ -20,12 +20,10 @@ export async function createEmployee({ name, birthday, salary }) {
 /** @returns all employees */
 export async function getEmployees() {
   const sql = `
-  SELECT id, name, birthday, salary
+  SELECT *
   FROM employees
   `;
-  const {
-    rows: [employees],
-  } = await db.query(sql);
+  const { rows: employees } = await db.query(sql);
   return employees;
 }
 
@@ -35,7 +33,7 @@ export async function getEmployees() {
  */
 export async function getEmployee(id) {
   const sql = `
-  SELECT id, name, birthday, salary
+  SELECT *
   FROM employees
   WHERE id = $1
   `;
@@ -52,13 +50,17 @@ export async function getEmployee(id) {
 export async function updateEmployee({ id, name, birthday, salary }) {
   const sql = `
   UPDATE employees
-  SET name = $2, birthday = $3, salary = $4
+  SET
+    name = $2,
+    birthday = $3,
+    salary = $4
   WHERE id = $1
-  RETURNING id, name, birthday, salary
+  RETURNING *
   `;
   const {
     rows: [employee],
-  } = await db.sql(sql, [id, name, birthday, salary]);
+  } = await db.query(sql, [id, name, birthday, salary]);
+  return employee;
 }
 
 /**
@@ -69,9 +71,10 @@ export async function deleteEmployee(id) {
   const sql = `
   DELETE FROM employees
   WHERE id = $1
-  RETURNING id, name, birthday, salary
+  RETURNING *
   `;
   const {
     rows: [employee],
-  } = await db.sql(sql, [id]);
+  } = await db.query(sql, [id]);
+  return employee;
 }
